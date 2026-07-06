@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมพิมพ์ฉลากยา TSC TE210</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Sarabun', 'Tahoma', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- ส่วนฟอร์มกรอกข้อมูล --- */
+        .input-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 550px;
+        }
+        .input-group { margin-bottom: 12px; display: flex; flex-direction: column; }
+        .input-group label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #333; }
+        .input-group input, .input-group select {
+            padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun', 'Tahoma', sans-serif;
+        }
+        .row { display: flex; gap: 10px; }
+        .row .input-group { flex: 1; }
+
+        .btn-print {
+            width: 100%; margin-top: 10px; padding: 12px; font-size: 16px;
+            font-weight: bold; background-color: #28a745; color: white; border: none;
+            border-radius: 4px; cursor: pointer;
+        }
+        .btn-print:hover { background-color: #218838; }
+
+        /* --- ส่วนฉลากยา (ขนาด 8x5 cm สำหรับ TSC TE210) --- */
+        .label-box {
+            width: 8cm;
+            height: 5cm;
+            background-color: #fff;
+            padding: 10mm 4mm 4mm 4mm; /* เว้นขอบบน 10mm */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #000;
+            overflow: hidden;
+        }
+        
+        /* แถวที่ 1: ชื่อ และ วันที่ */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+        .name-col { 
+            flex: 1; 
+            min-width: 0; /* สำคัญมาก: ช่วยให้ flex ย่อตัวได้ */
+            white-space: nowrap; 
+            overflow: hidden; 
+            font-size: 13px; /* ขนาดเริ่มต้น */
+            font-weight: bold;
+        }
+        .date-col { 
+            white-space: nowrap; 
+            font-size: 12px; 
+            margin-left: 5px; 
+        }
+
+        /* แถวที่ 2: ชื่อยา และ จำนวน */
+        .drug-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+        .drug-name-col {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 15px; /* ขนาดฟอนต์หลักของชื่อยา */
+        }
+        .drug-name-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
+        .drug-name-col span.value { font-size: 1em; font-weight: bold; } 
+        
+        .qty-col {
+            white-space: nowrap;
+            margin-left: 5px;
+            text-align: right;
+            font-size: 13px;
+        }
+        .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
+        .qty-col span.value { font-size: 1em; font-weight: bold; }
+
+        /* แถวที่ 3: วิธีกิน */
+        .instruction-box {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            overflow: hidden;
+        }
+        .ins-header { font-size: 11px; font-weight: bold; text-decoration: underline; margin-bottom: 2px;}
+        .ins-detail { width: 100%; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        .ins-line { 
+            font-size: 14px;
+            font-weight: bold; 
+            line-height: 1.2; 
+            width: 100%; 
+            text-align: center; 
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* แถวที่ 4: สรรพคุณ (อยู่ล่างสุด) */
+        .indication-row {
+            border-top: 1px solid #ddd;
+            padding-top: 3px;
+            text-align: center;
+            margin-top: auto;
+            width: 100%;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* --- ตั้งค่าการพริ้นต์ --- */
+        @media print {
+            body { background: transparent; padding: 0; align-items: flex-start; }
+            .input-section { display: none; }
+            .label-box { border: none; margin: 0; }
+            @page { size: 8cm 5cm; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="input-section">
+        <h3 style="text-align: center; margin-bottom: 15px;">ฟอร์มจัดทำฉลากยา</h3>
+
+        <div class="input-group">
+            <label>คำสั่งด่วน (เช่น prn q 4h, 1*3 pc)</label>
+            <input type="text" id="in-special-cmd" placeholder="พิมพ์คำสั่งด่วนที่นี่" onkeyup="parseSpecialCmd()">
+        </div>
+
+        <div class="row">
+            <div class="input-group" style="flex: 2;">
+                <label>ชื่อ-นามสกุล คนไข้</label>
+                <input type="text" id="in-name" value="" onkeyup="updateLabel()">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>วันที่</label>
+                <input type="text" id="in-date" onkeyup="updateLabel()">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group" style="flex: 2;">
+                <label>ชื่อยา / ความแรง</label>
+                <input type="text" id="in-drug" onkeyup="updateLabel()">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>จำนวน</label>
+                <input type="text" id="in-qty" onkeyup="updateLabel()">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group" style="flex: 1.5;">
+                <label>วิธีใช้ (เช่น รับประทานครั้งละ, ทาบางๆ)</label>
+                <input type="text" id="in-usage" value="รับประทานครั้งละ" onkeyup="updateLabel()">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>ปริมาณ (เช่น 1 เม็ด)</label>
+                <input type="text" id="in-dose" value="1 เม็ด" onkeyup="updateLabel()">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group" style="flex: 1;">
+                <label>ความถี่</label>
+                <select id="in-freq" onchange="autoSelectInstruction()">
+                    <option value="วันละ 1 ครั้ง" selected>วันละ 1 ครั้ง</option>
+                    <option value="วันละ 2 ครั้ง">วันละ 2 ครั้ง</option>
+                    <option value="วันละ 3 ครั้ง">วันละ 3 ครั้ง</option>
+                    <option value="วันละ 4 ครั้ง">วันละ 4 ครั้ง</option>
+                    <option value="ทุก 4-6 ชั่วโมง">ทุก 4-6 ชั่วโมง</option>
+                    <option value="ทุก 8 ชั่วโมง">ทุก 8 ชั่วโมง</option>
+                    <option value="เมื่อมีอาการ">เมื่อมีอาการ</option>
+                    <option value="">- ไม่ระบุ -</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-group">
+                <label>ก่อน/หลังอาหาร (หรือระบุเอง)</label>
+                <select id="in-meal" onchange="updateLabel()">
+                    <option value="ก่อนอาหาร">ก่อนอาหาร</option>
+                    <option value="หลังอาหาร" selected>หลังอาหาร</option>
+                    <option value="หลังอาหารทันที">หลังอาหารทันที</option>
+                    <option value="พร้อมอาหาร">พร้อมอาหาร</option>
+                    <option value="บริเวณที่เป็น">บริเวณที่เป็น</option>
+                    <option value="">- ไม่ระบุ -</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>เวลา</label>
+                <select id="in-time" onchange="updateLabel()">
+                    <option value="เช้า">เช้า</option>
+                    <option value="เย็น">เย็น</option>
+                    <option value="ก่อนนอน">ก่อนนอน</option>
+                    <option value="เช้า-เย็น">เช้า-เย็น</option>
+                    <option value="เช้า-กลางวัน-เย็น" selected>เช้า-กลางวัน-เย็น</option>
+                    <option value="เช้า-กลางวัน-เย็น-ก่อนนอน">เช้า-กลางวัน-เย็น-ก่อนนอน</option>
+                    <option value="">- ไม่ระบุ -</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>สรรพคุณ / ข้อบ่งใช้ (Indication)</label>
+            <input type="text" id="in-ind" value="" onkeyup="updateLabel()">
+        </div>
+
+        <button class="btn-print" onclick="window.print()">🖨️ สั่งพริ้นต์ฉลาก</button>
+    </div>
+
+    <div class="label-box">
+        <div class="header-row">
+            <div class="name-col" id="out-name-container">ชื่อ: <span id="out-name"></span></div>
+            <div class="date-col">วันที่: <span id="out-date"></span></div>
+        </div>
+        
+        <div class="drug-row">
+            <div class="drug-name-col" id="out-drug-container">
+                <span class="title">ชื่อยา:</span><span class="value" id="out-drug"></span>
+            </div>
+            <div class="qty-col">
+                <span class="title">จำนวน:</span><span class="value" id="out-qty"></span>
+            </div>
+        </div>
+
+        <div class="instruction-box">
+            <div class="ins-header">วิธีกิน / วิธีใช้</div>
+            <div class="ins-detail">
+                <div class="ins-line" id="ins-line1"></div>
+                <div class="ins-line" id="ins-line2"></div>
+            </div>
+        </div>
+
+        <div class="indication-row" id="out-ind-container">
+            <span id="out-ind"></span>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let yyyy = today.getFullYear() + 543; 
+            let currentDate = dd + '/' + mm + '/' + yyyy.toString().slice(-2); 
+            
+            document.getElementById('in-date').value = currentDate;
+            document.getElementById('out-date').innerText = currentDate;
+            updateLabel(); 
+        };
+
+        // ฟังก์ชันบีบขนาดฟอนต์อัตโนมัติ (รับประกันไม่ตกบรรทัด)
+        function autoShrinkText(elementId, defaultSize) {
+            let el = document.getElementById(elementId);
+            if (!el) return;
+            
+            // รีเซ็ตค่าเริ่มต้นก่อน
+            el.style.fontSize = defaultSize + 'px';
+            let currentSize = defaultSize;
+            
+            // เช็คว่าความกว้างตัวหนังสือ ทะลุกรอบที่มีให้หรือไม่
+            while (el.scrollWidth > el.clientWidth && currentSize > 8) {
+                currentSize -= 0.5;
+                el.style.fontSize = currentSize + 'px';
+            }
+        }
+
+        function autoSelectInstruction() {
+            let freq = document.getElementById('in-freq').value;
+            let timeSelect = document.getElementById('in-time');
+
+            if (freq.includes('วันละ 1')) timeSelect.value = 'เช้า';
+            else if (freq.includes('วันละ 2')) timeSelect.value = 'เช้า-เย็น';
+            else if (freq.includes('วันละ 3')) timeSelect.value = 'เช้า-กลางวัน-เย็น';
+            else if (freq.includes('วันละ 4')) timeSelect.value = 'เช้า-กลางวัน-เย็น-ก่อนนอน';
+
+            updateLabel();
+        }
+
+        // ฟังก์ชันที่ปรับปรุงใหม่ รองรับคำสั่งยาปกติ และ PRN
+        function parseSpecialCmd() {
+            let cmd = document.getElementById('in-special-cmd').value.trim();
+            if (!cmd) return;
+
+            // รูปแบบที่ 1: ยาทั่วไป เช่น Omeprazole 20 mg 1*2 ac หรือ Bromhexine 8 mg 1x3 pc
+            let matchNormal = cmd.match(/^(.+?)\s+(\d+)[*xX](\d+)\s+([a-zA-Z]+)$/i);
+            
+            // รูปแบบที่ 2: ยาตามอาการ (PRN) เช่น Paracetamol 500 mg 1 tab prn q 4-6 h
+            let matchPrn = cmd.match(/^(.+?)\s+(\d+(?:\.\d+)?)\s*(tab|cap|เม็ด|แคปซูล)?\s*prn\s*q\s*([\d-]+)\s*h(?:rs?)?$/i);
+
+            if (matchNormal) {
+                // --- จัดการข้อมูลยาทั่วไป ---
+                document.getElementById('in-drug').value = matchNormal[1].trim();
+                document.getElementById('in-dose').value = matchNormal[2] + ' เม็ด';
+                document.getElementById('in-freq').value = 'วันละ ' + matchNormal[3] + ' ครั้ง';
+
+                let meal = matchNormal[4].toLowerCase();
+                if (meal === 'ac') document.getElementById('in-meal').value = 'ก่อนอาหาร';
+                else if (meal === 'pc') document.getElementById('in-meal').value = 'หลังอาหาร';
+
+                autoSelectInstruction(); 
+
+            } else if (matchPrn) {
+                // --- จัดการข้อมูลยา PRN ---
+                document.getElementById('in-drug').value = matchPrn[1].trim();
+                
+                // แปลงหน่วย tab/cap ให้เป็นภาษาไทย (ถ้าไม่ได้พิมพ์มาให้ถือว่าเป็นเม็ด)
+                let unitStr = matchPrn[3] ? matchPrn[3].toLowerCase() : '';
+                let unit = 'เม็ด';
+                if (unitStr === 'cap' || unitStr === 'แคปซูล') unit = 'แคปซูล';
+                
+                document.getElementById('in-dose').value = matchPrn[2] + ' ' + unit;
+                
+                let hours = matchPrn[4];
+                let freqValue = `ทุก ${hours} ชั่วโมง`;
+                
+                // เช็คว่ามีตัวเลือกชั่วโมงนี้ใน Dropdown หรือยัง ถ้ายังไม่มีให้สร้างเพิ่มอัตโนมัติ
+                let freqSelect = document.getElementById('in-freq');
+                let optionExists = Array.from(freqSelect.options).some(opt => opt.value === freqValue);
+                if (!optionExists) {
+                    let newOption = new Option(freqValue, freqValue);
+                    freqSelect.add(newOption);
+                }
+                freqSelect.value = freqValue;
+                
+                // ตั้งค่าการกินยา
+                document.getElementById('in-usage').value = 'รับประทานครั้งละ';
+                document.getElementById('in-meal').value = ''; // ล้างค่ามื้ออาหารทิ้ง
+                
+                // นำคำว่า "เมื่อมีอาการ" ไปใส่ในช่องเวลา เพื่อให้ออกไปโชว์ที่บรรทัดที่ 2 ของฉลาก
+                let timeSelect = document.getElementById('in-time');
+                let timeOptionExists = Array.from(timeSelect.options).some(opt => opt.value === 'เมื่อมีอาการ');
+                if (!timeOptionExists) {
+                    timeSelect.options.add(new Option('เมื่อมีอาการ', 'เมื่อมีอาการ'));
+                }
+                timeSelect.value = 'เมื่อมีอาการ';
+
+                updateLabel();
+            }
+        }
+
+        function updateLabel() {
+            // 1. นำข้อความจากฟอร์มไปใส่ในฉลาก
+            document.getElementById('out-name').innerText = document.getElementById('in-name').value;
+            document.getElementById('out-date').innerText = document.getElementById('in-date').value;
+            document.getElementById('out-drug').innerText = document.getElementById('in-drug').value;
+            document.getElementById('out-qty').innerText = document.getElementById('in-qty').value;
+            
+            let usage = document.getElementById('in-usage').value;
+            let dose = document.getElementById('in-dose').value;
+            let freq = document.getElementById('in-freq').value;
+            let meal = document.getElementById('in-meal').value;
+            let time = document.getElementById('in-time').value;
+            let ind = document.getElementById('in-ind').value;
+
+            document.getElementById('ins-line1').innerText = `${usage} ${dose} ${freq}`.trim();
+            document.getElementById('ins-line2').innerText = `${meal} ${time}`.trim();
+            
+            document.getElementById('out-ind').innerText = ind ? "สรรพคุณ: " + ind : "";
+
+            // 2. เรียกให้ระบบเช็คและย่อขนาดข้อความ ถ้ามันล้นกรอบ
+            autoShrinkText('out-name-container', 13);
+            autoShrinkText('out-drug-container', 15);
+            autoShrinkText('ins-line1', 14);
+            autoShrinkText('ins-line2', 14);
+            autoShrinkText('out-ind-container', 11);
+        }
+    </script>
+
+</body>
+</html>
