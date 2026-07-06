@@ -8,139 +8,153 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Sarabun', 'Tahoma', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #f0f2f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
         }
 
-        /* --- ส่วนฟอร์มกรอกข้อมูล --- */
-        .input-section {
+        /* --- ส่วน UI การใช้งาน --- */
+        .ui-section {
+            width: 100%;
+            max-width: 1100px; /* ขยายความกว้างรวมเพื่อให้รองรับ 2 Card */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* --- Global Header (ข้อมูลคนไข้) --- */
+        .global-header {
             background: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 550px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid #007bff;
         }
+        .global-header h3 { text-align: center; margin-bottom: 15px; color: #333; }
+
+        /* --- Grid Container สำหรับเรียง Card --- */
+        #cards-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* บังคับให้เป็น 2 คอลัมน์ขนาดเท่ากัน */
+            gap: 15px; /* ระยะห่างระหว่างการ์ด */
+            width: 100%;
+            align-items: start; /* ให้การ์ดที่สูงไม่เท่ากัน เริ่มจากด้านบน */
+        }
+        
+        /* กรณีหน้าจอเล็ก (ต่ำกว่า 768px) ให้กลับมาแสดงแถวละ 1 ใบ */
+        @media (max-width: 768px) {
+            #cards-container {
+                grid-template-columns: 1fr; 
+            }
+        }
+
+        /* --- Drug Card (การ์ดยา) --- */
+        .drug-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            position: relative;
+            border: 1px solid #e0e0e0;
+            transition: border-color 0.2s;
+            width: 100%; /* ให้การ์ดกว้างเต็มช่อง Grid */
+        }
+        .drug-card:hover { border-color: #bbb; }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-header label.chk-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #28a745;
+            cursor: pointer;
+        }
+        .card-header input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        
+        .btn-delete {
+            background-color: #dc3545; color: white; border: none;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 13px;
+        }
+        .btn-delete:hover { background-color: #c82333; }
+
+        /* --- Input Forms --- */
         .input-group { margin-bottom: 12px; display: flex; flex-direction: column; }
-        .input-group label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #333; }
+        .input-group label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #444; }
         .input-group input, .input-group select {
-            padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun', 'Tahoma', sans-serif;
+            padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; 
+            font-family: 'Sarabun', 'Tahoma', sans-serif;
+            width: 100%;
         }
         .row { display: flex; gap: 10px; }
-        .row .input-group { flex: 1; }
+        .row .input-group { flex: 1; min-width: 0; /* ช่วยให้ input ไม่ดันกรอบใน layout แบบ flex */ } 
 
+        /* --- Action Buttons --- */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 40px;
+        }
+        .btn-add {
+            flex: 1; padding: 12px; font-size: 16px; font-weight: bold;
+            background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;
+        }
+        .btn-add:hover { background-color: #0069d9; }
+        
         .btn-print {
-            width: 100%; margin-top: 10px; padding: 12px; font-size: 16px;
-            font-weight: bold; background-color: #28a745; color: white; border: none;
-            border-radius: 4px; cursor: pointer;
+            flex: 2; padding: 12px; font-size: 16px; font-weight: bold;
+            background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;
         }
         .btn-print:hover { background-color: #218838; }
 
-        /* --- ส่วนฉลากยา (ขนาด 8x5 cm สำหรับ TSC TE210) --- */
+        /* --- ส่วนฉลากยาสำหรับพริ้นต์ (ซ่อนไว้ตอนใช้งานปกติ) --- */
+        #print-area { display: none; }
+        
         .label-box {
             width: 8cm;
             height: 5cm;
             background-color: #fff;
-            padding: 10mm 4mm 4mm 4mm; /* เว้นขอบบน 10mm */
+            padding: 10mm 4mm 4mm 4mm;
             display: flex;
             flex-direction: column;
             border: 1px solid #000;
             overflow: hidden;
+            box-sizing: border-box;
+            page-break-after: always;
         }
-        
-        /* แถวที่ 1: ชื่อ และ วันที่ */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 3px;
-            margin-bottom: 4px;
-            width: 100%;
-        }
-        .name-col { 
-            flex: 1; 
-            min-width: 0; /* สำคัญมาก: ช่วยให้ flex ย่อตัวได้ */
-            white-space: nowrap; 
-            overflow: hidden; 
-            font-size: 13px; /* ขนาดเริ่มต้น */
-            font-weight: bold;
-        }
-        .date-col { 
-            white-space: nowrap; 
-            font-size: 12px; 
-            margin-left: 5px; 
-        }
-
-        /* แถวที่ 2: ชื่อยา และ จำนวน */
-        .drug-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 4px;
-            width: 100%;
-        }
-        .drug-name-col {
-            flex: 1;
-            min-width: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            font-size: 15px; /* ขนาดฟอนต์หลักของชื่อยา */
-        }
+        .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px dashed #000; padding-bottom: 3px; margin-bottom: 4px; width: 100%; }
+        .name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 13px; font-weight: bold; }
+        .date-col { white-space: nowrap; font-size: 12px; margin-left: 5px; }
+        .drug-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; width: 100%; }
+        .drug-name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 15px; }
         .drug-name-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
         .drug-name-col span.value { font-size: 1em; font-weight: bold; } 
-        
-        .qty-col {
-            white-space: nowrap;
-            margin-left: 5px;
-            text-align: right;
-            font-size: 13px;
-        }
+        .qty-col { white-space: nowrap; margin-left: 5px; text-align: right; font-size: 13px; }
         .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
         .qty-col span.value { font-size: 1em; font-weight: bold; }
-
-        /* แถวที่ 3: วิธีกิน */
-        .instruction-box {
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            width: 100%;
-            overflow: hidden;
-        }
+        .instruction-box { text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; overflow: hidden; }
         .ins-header { font-size: 11px; font-weight: bold; text-decoration: underline; margin-bottom: 2px;}
         .ins-detail { width: 100%; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-        .ins-line { 
-            font-size: 14px;
-            font-weight: bold; 
-            line-height: 1.2; 
-            width: 100%; 
-            text-align: center; 
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        /* แถวที่ 4: สรรพคุณ (อยู่ล่างสุด) */
-        .indication-row {
-            border-top: 1px solid #ddd;
-            padding-top: 3px;
-            text-align: center;
-            margin-top: auto;
-            width: 100%;
-            font-size: 11px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
+        .ins-line { font-size: 14px; font-weight: bold; line-height: 1.2; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
+        .indication-row { border-top: 1px solid #ddd; padding-top: 3px; text-align: center; margin-top: auto; width: 100%; font-size: 11px; white-space: nowrap; overflow: hidden; }
 
         /* --- ตั้งค่าการพริ้นต์ --- */
         @media print {
             body { background: transparent; padding: 0; align-items: flex-start; }
-            .input-section { display: none; }
+            .ui-section { display: none !important; }
+            #print-area { display: block !important; width: 8cm; }
             .label-box { border: none; margin: 0; }
             @page { size: 8cm 5cm; margin: 0; }
         }
@@ -148,124 +162,135 @@
 </head>
 <body>
 
-    <div class="input-section">
-        <h3 style="text-align: center; margin-bottom: 15px;">ฟอร์มจัดทำฉลากยา</h3>
+    <datalist id="freq-options">
+        <option value="วันละ 1 ครั้ง"></option>
+        <option value="วันละ 2 ครั้ง"></option>
+        <option value="วันละ 3 ครั้ง"></option>
+        <option value="วันละ 4 ครั้ง"></option>
+        <option value="ทุก 4 ชั่วโมง"></option>
+        <option value="ทุก 6 ชั่วโมง"></option>
+        <option value="ทุก 4-6 ชั่วโมง"></option>
+        <option value="ทุก 8 ชั่วโมง"></option>
+        <option value="เมื่อมีอาการ"></option>
+    </datalist>
 
-        <div class="input-group">
-            <label>คำสั่งด่วน (เช่น prn q 4h, 1*3 pc)</label>
-            <input type="text" id="in-special-cmd" placeholder="พิมพ์คำสั่งด่วนที่นี่" onkeyup="parseSpecialCmd()">
-        </div>
-
-        <div class="row">
-            <div class="input-group" style="flex: 2;">
-                <label>ชื่อ-นามสกุล คนไข้</label>
-                <input type="text" id="in-name" value="" onkeyup="updateLabel()">
-            </div>
-            <div class="input-group" style="flex: 1;">
-                <label>วันที่</label>
-                <input type="text" id="in-date" onkeyup="updateLabel()">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-group" style="flex: 2;">
-                <label>ชื่อยา / ความแรง</label>
-                <input type="text" id="in-drug" onkeyup="updateLabel()">
-            </div>
-            <div class="input-group" style="flex: 1;">
-                <label>จำนวน</label>
-                <input type="text" id="in-qty" onkeyup="updateLabel()">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-group" style="flex: 1.5;">
-                <label>วิธีใช้ (เช่น รับประทานครั้งละ, ทาบางๆ)</label>
-                <input type="text" id="in-usage" value="รับประทานครั้งละ" onkeyup="updateLabel()">
-            </div>
-            <div class="input-group" style="flex: 1;">
-                <label>ปริมาณ (เช่น 1 เม็ด)</label>
-                <input type="text" id="in-dose" value="1 เม็ด" onkeyup="updateLabel()">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-group" style="flex: 1;">
-                <label>ความถี่</label>
-                <select id="in-freq" onchange="autoSelectInstruction()">
-                    <option value="วันละ 1 ครั้ง" selected>วันละ 1 ครั้ง</option>
-                    <option value="วันละ 2 ครั้ง">วันละ 2 ครั้ง</option>
-                    <option value="วันละ 3 ครั้ง">วันละ 3 ครั้ง</option>
-                    <option value="วันละ 4 ครั้ง">วันละ 4 ครั้ง</option>
-                    <option value="ทุก 4-6 ชั่วโมง">ทุก 4-6 ชั่วโมง</option>
-                    <option value="ทุก 8 ชั่วโมง">ทุก 8 ชั่วโมง</option>
-                    <option value="เมื่อมีอาการ">เมื่อมีอาการ</option>
-                    <option value="">- ไม่ระบุ -</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="input-group">
-                <label>ก่อน/หลังอาหาร (หรือระบุเอง)</label>
-                <select id="in-meal" onchange="updateLabel()">
-                    <option value="ก่อนอาหาร">ก่อนอาหาร</option>
-                    <option value="หลังอาหาร" selected>หลังอาหาร</option>
-                    <option value="หลังอาหารทันที">หลังอาหารทันที</option>
-                    <option value="พร้อมอาหาร">พร้อมอาหาร</option>
-                    <option value="บริเวณที่เป็น">บริเวณที่เป็น</option>
-                    <option value="">- ไม่ระบุ -</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>เวลา</label>
-                <select id="in-time" onchange="updateLabel()">
-                    <option value="เช้า">เช้า</option>
-                    <option value="เย็น">เย็น</option>
-                    <option value="ก่อนนอน">ก่อนนอน</option>
-                    <option value="เช้า-เย็น">เช้า-เย็น</option>
-                    <option value="เช้า-กลางวัน-เย็น" selected>เช้า-กลางวัน-เย็น</option>
-                    <option value="เช้า-กลางวัน-เย็น-ก่อนนอน">เช้า-กลางวัน-เย็น-ก่อนนอน</option>
-                    <option value="">- ไม่ระบุ -</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label>สรรพคุณ / ข้อบ่งใช้ (Indication)</label>
-            <input type="text" id="in-ind" value="" onkeyup="updateLabel()">
-        </div>
-
-        <button class="btn-print" onclick="window.print()">🖨️ สั่งพริ้นต์ฉลาก</button>
-    </div>
-
-    <div class="label-box">
-        <div class="header-row">
-            <div class="name-col" id="out-name-container">ชื่อ: <span id="out-name"></span></div>
-            <div class="date-col">วันที่: <span id="out-date"></span></div>
-        </div>
+    <div class="ui-section">
         
-        <div class="drug-row">
-            <div class="drug-name-col" id="out-drug-container">
-                <span class="title">ชื่อยา:</span><span class="value" id="out-drug"></span>
-            </div>
-            <div class="qty-col">
-                <span class="title">จำนวน:</span><span class="value" id="out-qty"></span>
-            </div>
-        </div>
-
-        <div class="instruction-box">
-            <div class="ins-header">วิธีกิน / วิธีใช้</div>
-            <div class="ins-detail">
-                <div class="ins-line" id="ins-line1"></div>
-                <div class="ins-line" id="ins-line2"></div>
+        <div class="global-header">
+            <h3>ฟอร์มจัดทำฉลากยา</h3>
+            <div class="row">
+                <div class="input-group" style="flex: 2;">
+                    <label>ชื่อ-นามสกุล คนไข้ (Main)</label>
+                    <input type="text" id="global-name" placeholder="ระบุชื่อคนไข้">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>วันที่</label>
+                    <input type="text" id="global-date">
+                </div>
             </div>
         </div>
 
-        <div class="indication-row" id="out-ind-container">
-            <span id="out-ind"></span>
+        <div id="cards-container">
+            </div>
+
+        <div class="action-buttons">
+            <button class="btn-add" onclick="addNewCard()">+ เพิ่มรายการยา</button>
+            <button class="btn-print" onclick="printSelected()">🖨️ สั่งพริ้นต์เฉพาะที่เลือก</button>
         </div>
+
     </div>
+
+    <div id="print-area"></div>
+
+    <template id="card-template">
+        <div class="drug-card">
+            <div class="card-header">
+                <label class="chk-container">
+                    <input type="checkbox" class="chk-print" checked> พิมพ์รายการนี้
+                </label>
+                <button class="btn-delete" onclick="this.closest('.drug-card').remove()">ลบการ์ด</button>
+            </div>
+
+            <div class="input-group" style="background: #eef8ff; padding: 10px; border-radius: 4px;">
+                <label style="color: #0056b3;">⚡ คำสั่งด่วน (เช่น prn q 4h, 1*3 pc)</label>
+                <input type="text" class="in-special-cmd" placeholder="พิมพ์คำสั่งด่วนที่นี่" onkeyup="parseSpecialCmd(this)">
+            </div>
+
+            <div class="row">
+                <div class="input-group" style="flex: 2;">
+                    <label>ชื่อยา / ความแรง</label>
+                    <input type="text" class="in-drug">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>จำนวน</label>
+                    <input type="text" class="in-qty">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group" style="flex: 1.5;">
+                    <label>วิธีใช้ (เช่น รับประทานครั้งละ, ทาบางๆ)</label>
+                    <input type="text" class="in-usage" value="รับประทานครั้งละ">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>ปริมาณ (เช่น 1 เม็ด)</label>
+                    <input type="text" class="in-dose" value="1 เม็ด">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group" style="flex: 1;">
+                    <label>ความถี่ (เลือกจากรายการ หรือพิมพ์แก้เอง)</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                        <select class="freq-select" onchange="applyFreqSelection(this)" style="flex: 1; min-width: 120px;">
+                            <option value="">-- เลือก --</option>
+                            <option value="วันละ 1 ครั้ง">วันละ 1 ครั้ง</option>
+                            <option value="วันละ 2 ครั้ง">วันละ 2 ครั้ง</option>
+                            <option value="วันละ 3 ครั้ง">วันละ 3 ครั้ง</option>
+                            <option value="วันละ 4 ครั้ง">วันละ 4 ครั้ง</option>
+                            <option value="ทุก 4 ชั่วโมง">ทุก 4 ชั่วโมง</option>
+                            <option value="ทุก 6 ชั่วโมง">ทุก 6 ชั่วโมง</option>
+                            <option value="ทุก 4-6 ชั่วโมง">ทุก 4-6 ชั่วโมง</option>
+                            <option value="ทุก 8 ชั่วโมง">ทุก 8 ชั่วโมง</option>
+                            <option value="เมื่อมีอาการ">เมื่อมีอาการ</option>
+                        </select>
+                        <input type="text" class="in-freq" list="freq-options" value="วันละ 1 ครั้ง" onkeyup="autoSelectInstruction(this)" style="flex: 1.5; min-width: 120px;" placeholder="ระบุความถี่">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>ก่อน/หลังอาหาร (หรือระบุเอง)</label>
+                    <select class="in-meal">
+                        <option value="ก่อนอาหาร">ก่อนอาหาร</option>
+                        <option value="หลังอาหาร" selected>หลังอาหาร</option>
+                        <option value="หลังอาหารทันที">หลังอาหารทันที</option>
+                        <option value="พร้อมอาหาร">พร้อมอาหาร</option>
+                        <option value="บริเวณที่เป็น">บริเวณที่เป็น</option>
+                        <option value="">- ไม่ระบุ -</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>เวลา</label>
+                    <select class="in-time">
+                        <option value="เช้า">เช้า</option>
+                        <option value="เย็น">เย็น</option>
+                        <option value="ก่อนนอน">ก่อนนอน</option>
+                        <option value="เช้า-เย็น">เช้า-เย็น</option>
+                        <option value="เช้า-กลางวัน-เย็น" selected>เช้า-กลางวัน-เย็น</option>
+                        <option value="เช้า-กลางวัน-เย็น-ก่อนนอน">เช้า-กลางวัน-เย็น-ก่อนนอน</option>
+                        <option value="">- ไม่ระบุ -</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 0;">
+                <label>สรรพคุณ / ข้อบ่งใช้ (Indication)</label>
+                <input type="text" class="in-ind" placeholder="เช่น ยาลดความดันโลหิต">
+            </div>
+        </div>
+    </template>
 
     <script>
         window.onload = function() {
@@ -273,128 +298,171 @@
             let dd = String(today.getDate()).padStart(2, '0');
             let mm = String(today.getMonth() + 1).padStart(2, '0');
             let yyyy = today.getFullYear() + 543; 
-            let currentDate = dd + '/' + mm + '/' + yyyy.toString().slice(-2); 
-            
-            document.getElementById('in-date').value = currentDate;
-            document.getElementById('out-date').innerText = currentDate;
-            updateLabel(); 
+            document.getElementById('global-date').value = dd + '/' + mm + '/' + yyyy.toString().slice(-2); 
+
+            addNewCard();
         };
 
-        // ฟังก์ชันบีบขนาดฟอนต์อัตโนมัติ (รับประกันไม่ตกบรรทัด)
-        function autoShrinkText(elementId, defaultSize) {
-            let el = document.getElementById(elementId);
+        function addNewCard() {
+            const template = document.getElementById('card-template');
+            const clone = template.content.cloneNode(true);
+            document.getElementById('cards-container').appendChild(clone);
+        }
+
+        function applyFreqSelection(selectElem) {
+            let selectVal = selectElem.value;
+            if(selectVal) {
+                let card = selectElem.closest('.drug-card');
+                let inputFreq = card.querySelector('.in-freq');
+                inputFreq.value = selectVal;
+                autoSelectInstruction(inputFreq);
+            }
+        }
+
+        function autoSelectInstruction(elementInCard) {
+            let card = elementInCard.closest('.drug-card');
+            let freq = card.querySelector('.in-freq').value;
+            let timeSelect = card.querySelector('.in-time');
+
+            if (freq.includes('วันละ 1')) timeSelect.value = 'เช้า';
+            else if (freq.includes('วันละ 2')) timeSelect.value = 'เช้า-เย็น';
+            else if (freq.includes('วันละ 3')) timeSelect.value = 'เช้า-กลางวัน-เย็น';
+            else if (freq.includes('วันละ 4')) timeSelect.value = 'เช้า-กลางวัน-เย็น-ก่อนนอน';
+        }
+
+        function parseSpecialCmd(inputElem) {
+            let cmd = inputElem.value.trim();
+            if (!cmd) return;
+
+            let card = inputElem.closest('.drug-card');
+
+            let matchNormal = cmd.match(/^(.+?)\s+(\d+)[*xX](\d+)\s+([a-zA-Z]+)$/i);
+            let matchPrn = cmd.match(/^(.+?)\s+(\d+(?:\.\d+)?)\s*(tab|cap|เม็ด|แคปซูล)?\s*prn\s*q\s*([\d-]+)\s*h(?:rs?)?$/i);
+
+            if (matchNormal) {
+                card.querySelector('.in-drug').value = matchNormal[1].trim();
+                card.querySelector('.in-dose').value = matchNormal[2] + ' เม็ด';
+                card.querySelector('.in-freq').value = 'วันละ ' + matchNormal[3] + ' ครั้ง';
+                card.querySelector('.freq-select').value = ""; 
+
+                let meal = matchNormal[4].toLowerCase();
+                let mealSelect = card.querySelector('.in-meal');
+                if (meal === 'ac') mealSelect.value = 'ก่อนอาหาร';
+                else if (meal === 'pc') mealSelect.value = 'หลังอาหาร';
+
+                autoSelectInstruction(inputElem); 
+
+            } else if (matchPrn) {
+                card.querySelector('.in-drug').value = matchPrn[1].trim();
+                
+                let unitStr = matchPrn[3] ? matchPrn[3].toLowerCase() : '';
+                let unit = 'เม็ด';
+                if (unitStr === 'cap' || unitStr === 'แคปซูล') unit = 'แคปซูล';
+                
+                card.querySelector('.in-dose').value = matchPrn[2] + ' ' + unit;
+                card.querySelector('.in-freq').value = `ทุก ${matchPrn[4]} ชั่วโมง`;
+                card.querySelector('.freq-select').value = ""; 
+                
+                card.querySelector('.in-usage').value = 'รับประทานครั้งละ';
+                card.querySelector('.in-meal').value = ''; 
+                
+                let timeSelect = card.querySelector('.in-time');
+                let timeOptionExists = Array.from(timeSelect.options).some(opt => opt.value === 'เมื่อมีอาการ');
+                if (!timeOptionExists) {
+                    timeSelect.options.add(new Option('เมื่อมีอาการ', 'เมื่อมีอาการ'));
+                }
+                timeSelect.value = 'เมื่อมีอาการ';
+            }
+        }
+
+        function autoShrinkNode(el, defaultSize) {
             if (!el) return;
-            
-            // รีเซ็ตค่าเริ่มต้นก่อน
             el.style.fontSize = defaultSize + 'px';
             let currentSize = defaultSize;
             
-            // เช็คว่าความกว้างตัวหนังสือ ทะลุกรอบที่มีให้หรือไม่
             while (el.scrollWidth > el.clientWidth && currentSize > 8) {
                 currentSize -= 0.5;
                 el.style.fontSize = currentSize + 'px';
             }
         }
 
-        function autoSelectInstruction() {
-            let freq = document.getElementById('in-freq').value;
-            let timeSelect = document.getElementById('in-time');
+        function printSelected() {
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = ''; 
 
-            if (freq.includes('วันละ 1')) timeSelect.value = 'เช้า';
-            else if (freq.includes('วันละ 2')) timeSelect.value = 'เช้า-เย็น';
-            else if (freq.includes('วันละ 3')) timeSelect.value = 'เช้า-กลางวัน-เย็น';
-            else if (freq.includes('วันละ 4')) timeSelect.value = 'เช้า-กลางวัน-เย็น-ก่อนนอน';
+            const patientName = document.getElementById('global-name').value;
+            const patientDate = document.getElementById('global-date').value;
 
-            updateLabel();
-        }
+            const cards = document.querySelectorAll('.drug-card');
+            let hasSelected = false;
 
-        // ฟังก์ชันที่ปรับปรุงใหม่ รองรับคำสั่งยาปกติ และ PRN
-        function parseSpecialCmd() {
-            let cmd = document.getElementById('in-special-cmd').value.trim();
-            if (!cmd) return;
-
-            // รูปแบบที่ 1: ยาทั่วไป เช่น Omeprazole 20 mg 1*2 ac หรือ Bromhexine 8 mg 1x3 pc
-            let matchNormal = cmd.match(/^(.+?)\s+(\d+)[*xX](\d+)\s+([a-zA-Z]+)$/i);
-            
-            // รูปแบบที่ 2: ยาตามอาการ (PRN) เช่น Paracetamol 500 mg 1 tab prn q 4-6 h
-            let matchPrn = cmd.match(/^(.+?)\s+(\d+(?:\.\d+)?)\s*(tab|cap|เม็ด|แคปซูล)?\s*prn\s*q\s*([\d-]+)\s*h(?:rs?)?$/i);
-
-            if (matchNormal) {
-                // --- จัดการข้อมูลยาทั่วไป ---
-                document.getElementById('in-drug').value = matchNormal[1].trim();
-                document.getElementById('in-dose').value = matchNormal[2] + ' เม็ด';
-                document.getElementById('in-freq').value = 'วันละ ' + matchNormal[3] + ' ครั้ง';
-
-                let meal = matchNormal[4].toLowerCase();
-                if (meal === 'ac') document.getElementById('in-meal').value = 'ก่อนอาหาร';
-                else if (meal === 'pc') document.getElementById('in-meal').value = 'หลังอาหาร';
-
-                autoSelectInstruction(); 
-
-            } else if (matchPrn) {
-                // --- จัดการข้อมูลยา PRN ---
-                document.getElementById('in-drug').value = matchPrn[1].trim();
+            cards.forEach(card => {
+                const isChecked = card.querySelector('.chk-print').checked;
+                if (!isChecked) return; 
                 
-                // แปลงหน่วย tab/cap ให้เป็นภาษาไทย (ถ้าไม่ได้พิมพ์มาให้ถือว่าเป็นเม็ด)
-                let unitStr = matchPrn[3] ? matchPrn[3].toLowerCase() : '';
-                let unit = 'เม็ด';
-                if (unitStr === 'cap' || unitStr === 'แคปซูล') unit = 'แคปซูล';
-                
-                document.getElementById('in-dose').value = matchPrn[2] + ' ' + unit;
-                
-                let hours = matchPrn[4];
-                let freqValue = `ทุก ${hours} ชั่วโมง`;
-                
-                // เช็คว่ามีตัวเลือกชั่วโมงนี้ใน Dropdown หรือยัง ถ้ายังไม่มีให้สร้างเพิ่มอัตโนมัติ
-                let freqSelect = document.getElementById('in-freq');
-                let optionExists = Array.from(freqSelect.options).some(opt => opt.value === freqValue);
-                if (!optionExists) {
-                    let newOption = new Option(freqValue, freqValue);
-                    freqSelect.add(newOption);
-                }
-                freqSelect.value = freqValue;
-                
-                // ตั้งค่าการกินยา
-                document.getElementById('in-usage').value = 'รับประทานครั้งละ';
-                document.getElementById('in-meal').value = ''; // ล้างค่ามื้ออาหารทิ้ง
-                
-                // นำคำว่า "เมื่อมีอาการ" ไปใส่ในช่องเวลา เพื่อให้ออกไปโชว์ที่บรรทัดที่ 2 ของฉลาก
-                let timeSelect = document.getElementById('in-time');
-                let timeOptionExists = Array.from(timeSelect.options).some(opt => opt.value === 'เมื่อมีอาการ');
-                if (!timeOptionExists) {
-                    timeSelect.options.add(new Option('เมื่อมีอาการ', 'เมื่อมีอาการ'));
-                }
-                timeSelect.value = 'เมื่อมีอาการ';
+                hasSelected = true;
 
-                updateLabel();
+                const drug = card.querySelector('.in-drug').value;
+                const qty = card.querySelector('.in-qty').value;
+                const usage = card.querySelector('.in-usage').value;
+                const dose = card.querySelector('.in-dose').value;
+                const freq = card.querySelector('.in-freq').value;
+                const meal = card.querySelector('.in-meal').value;
+                const time = card.querySelector('.in-time').value;
+                const ind = card.querySelector('.in-ind').value;
+
+                const line1 = `${usage} ${dose} ${freq}`.trim();
+                const line2 = `${meal} ${time}`.trim();
+                const indicationStr = ind ? `สรรพคุณ: ${ind}` : '';
+
+                const labelHTML = `
+                    <div class="label-box">
+                        <div class="header-row">
+                            <div class="name-col out-name-container">ชื่อ: <span class="val-name">${patientName}</span></div>
+                            <div class="date-col">วันที่: <span>${patientDate}</span></div>
+                        </div>
+                        
+                        <div class="drug-row">
+                            <div class="drug-name-col out-drug-container">
+                                <span class="title">ชื่อยา:</span><span class="value val-drug">${drug}</span>
+                            </div>
+                            <div class="qty-col">
+                                <span class="title">จำนวน:</span><span class="value">${qty}</span>
+                            </div>
+                        </div>
+
+                        <div class="instruction-box">
+                            <div class="ins-header">วิธีกิน / วิธีใช้</div>
+                            <div class="ins-detail">
+                                <div class="ins-line ins-line1">${line1}</div>
+                                <div class="ins-line ins-line2">${line2}</div>
+                            </div>
+                        </div>
+
+                        <div class="indication-row out-ind-container">
+                            <span>${indicationStr}</span>
+                        </div>
+                    </div>
+                `;
+                
+                printArea.insertAdjacentHTML('beforeend', labelHTML);
+            });
+
+            if (!hasSelected) {
+                alert('กรุณาเลือกรายการยา (Tick checkbox) อย่างน้อย 1 รายการเพื่อพริ้นต์ครับ');
+                return;
             }
-        }
 
-        function updateLabel() {
-            // 1. นำข้อความจากฟอร์มไปใส่ในฉลาก
-            document.getElementById('out-name').innerText = document.getElementById('in-name').value;
-            document.getElementById('out-date').innerText = document.getElementById('in-date').value;
-            document.getElementById('out-drug').innerText = document.getElementById('in-drug').value;
-            document.getElementById('out-qty').innerText = document.getElementById('in-qty').value;
-            
-            let usage = document.getElementById('in-usage').value;
-            let dose = document.getElementById('in-dose').value;
-            let freq = document.getElementById('in-freq').value;
-            let meal = document.getElementById('in-meal').value;
-            let time = document.getElementById('in-time').value;
-            let ind = document.getElementById('in-ind').value;
+            const generatedLabels = printArea.querySelectorAll('.label-box');
+            generatedLabels.forEach(label => {
+                autoShrinkNode(label.querySelector('.out-name-container'), 13);
+                autoShrinkNode(label.querySelector('.out-drug-container'), 15);
+                autoShrinkNode(label.querySelector('.ins-line1'), 14);
+                autoShrinkNode(label.querySelector('.ins-line2'), 14);
+                autoShrinkNode(label.querySelector('.out-ind-container'), 11);
+            });
 
-            document.getElementById('ins-line1').innerText = `${usage} ${dose} ${freq}`.trim();
-            document.getElementById('ins-line2').innerText = `${meal} ${time}`.trim();
-            
-            document.getElementById('out-ind').innerText = ind ? "สรรพคุณ: " + ind : "";
-
-            // 2. เรียกให้ระบบเช็คและย่อขนาดข้อความ ถ้ามันล้นกรอบ
-            autoShrinkText('out-name-container', 13);
-            autoShrinkText('out-drug-container', 15);
-            autoShrinkText('ins-line1', 14);
-            autoShrinkText('ins-line2', 14);
-            autoShrinkText('out-ind-container', 11);
+            window.print();
         }
     </script>
 
