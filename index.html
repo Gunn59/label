@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมพิมพ์ฉลากยา TSC TE210 / TTP 244 Pro (แนวตั้ง)</title>
+    <title>โปรแกรมพิมพ์ฉลากยา TSC TE210 / TTP 244 Pro (แนวนอนหมุน 90 องศา)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -113,50 +113,63 @@
         }
         .btn-print:hover { background-color: #218838; }
 
-        /* --- ส่วนฉลากยาสำหรับพริ้นต์ (ปรับเป็นแนวตั้ง Portrait) --- */
+        /* --- ส่วนฉลากยาสำหรับพริ้นต์ --- */
         #print-area { display: none; }
         
-        .label-box {
-            /* กำหนดความกว้างและความสูงตามแนวตั้งของสติกเกอร์ */
+        /* สร้างกรอบกระดาษแนวตั้ง เพื่อหลอกเครื่องปริ้นต์ */
+        .print-page {
             width: 101.6mm;
             height: 152.4mm;
-            background-color: #fff;
-            padding: 12mm; 
+            position: relative;
+            overflow: hidden;
+            page-break-after: always;
+            background: white;
+        }
+
+        /* กล่องข้อความแนวนอนที่จะถูกสั่งหมุน 90 องศาให้อยู่ในหน้ากระดาษ */
+        .label-box {
+            width: 152.4mm;
+            height: 101.6mm;
+            padding: 12mm 15mm 10mm 15mm; 
             display: flex;
             flex-direction: column;
-            border: 1px solid #000;
-            overflow: hidden;
             box-sizing: border-box;
-            page-break-after: always;
             color: #000;
+            
+            /* คำสั่งหมุนข้อความให้อยู่แนวนอน */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(90deg);
         }
-        .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 12px; width: 100%; }
-        .name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 20px; font-weight: bold; }
-        .date-col { white-space: nowrap; font-size: 16px; margin-left: 10px; }
-        
-        /* ปรับให้ ชื่อยา และ จำนวน เรียงต่อกันเป็นบรรทัดเพื่อประหยัดพื้นที่แนวกว้าง */
-        .drug-row { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 12px; width: 100%; gap: 6px; }
-        .drug-name-col { width: 100%; white-space: nowrap; overflow: hidden; font-size: 24px; }
-        .drug-name-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 4px;}
-        .drug-name-col span.value { font-size: 1.1em; font-weight: bold; } 
-        .qty-col { width: 100%; white-space: nowrap; font-size: 18px; }
-        .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 4px;}
-        .qty-col span.value { font-size: 1.1em; font-weight: bold; }
-        
-        .instruction-box { text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; overflow: hidden; margin-top: 5px; }
-        .ins-header { font-size: 18px; font-weight: bold; text-decoration: underline; margin-bottom: 6px;}
-        .ins-detail { width: 100%; display: flex; flex-direction: column; align-items: center; overflow: hidden; gap: 8px; }
-        .ins-line { font-size: 28px; font-weight: bold; line-height: 1.4; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
-        
-        .indication-row { border-top: 1px solid #ddd; padding-top: 8px; text-align: center; margin-top: auto; width: 100%; font-size: 16px; white-space: nowrap; overflow: hidden; }
 
-        /* --- ตั้งค่าการพริ้นต์ --- */
+        /* ขยายขนาดฟอนต์ให้ใหญ่เต็มตาตามความกว้าง 6 นิ้ว */
+        .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px dashed #000; padding-bottom: 5px; margin-bottom: 12px; width: 100%; }
+        .name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 24px; font-weight: bold; }
+        .date-col { white-space: nowrap; font-size: 20px; margin-left: 10px; }
+        
+        .drug-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; width: 100%; }
+        .drug-name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 30px; }
+        .drug-name-col span.title { font-size: 0.8em; font-weight: normal; margin-right: 6px;}
+        .drug-name-col span.value { font-size: 1.1em; font-weight: bold; } 
+        .qty-col { white-space: nowrap; margin-left: 15px; text-align: right; font-size: 22px; }
+        .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 4px;}
+        .qty-col span.value { font-size: 1.2em; font-weight: bold; }
+        
+        .instruction-box { text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; overflow: hidden; }
+        .ins-header { font-size: 20px; font-weight: bold; text-decoration: underline; margin-bottom: 8px;}
+        .ins-detail { width: 100%; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        .ins-line { font-size: 32px; font-weight: bold; line-height: 1.4; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
+        
+        .indication-row { border-top: 1px solid #ddd; padding-top: 10px; text-align: center; margin-top: auto; width: 100%; font-size: 20px; white-space: nowrap; overflow: hidden; }
+
+        /* --- ตั้งค่าการพริ้นต์ให้ออกมาเป็นแนวตั้งเท่านั้น --- */
         @media print {
             body { background: transparent; padding: 0; align-items: flex-start; margin: 0; }
             .ui-section { display: none !important; }
             #print-area { display: block !important; width: 101.6mm; }
-            .label-box { border: none; margin: 0; }
-            /* บังคับขนาดหน้ากระดาษให้เป็นแนวตั้ง */
+            
+            /* บังคับกระดาษเป็นแนวตั้ง (Portrait) เสมอ */
             @page { size: 101.6mm 152.4mm; margin: 0; }
         }
     </style>
@@ -378,7 +391,7 @@
             el.style.fontSize = defaultSize + 'px';
             let currentSize = defaultSize;
             
-            while (el.scrollWidth > el.clientWidth && currentSize > 8) {
+            while (el.scrollWidth > el.clientWidth && currentSize > 10) {
                 currentSize -= 0.5;
                 el.style.fontSize = currentSize + 'px';
             }
@@ -413,32 +426,35 @@
                 const line2 = `${meal} ${time}`.trim();
                 const indicationStr = ind ? `สรรพคุณ: ${ind}` : '';
 
+                // ครอบด้วย .print-page เพื่อล็อคกระดาษเป็นแนวตั้ง
                 const labelHTML = `
-                    <div class="label-box">
-                        <div class="header-row">
-                            <div class="name-col out-name-container">ชื่อ: <span class="val-name">${patientName}</span></div>
-                            <div class="date-col">วันที่: <span>${patientDate}</span></div>
-                        </div>
-                        
-                        <div class="drug-row">
-                            <div class="drug-name-col out-drug-container">
-                                <span class="title">ชื่อยา:</span><span class="value val-drug">${drug}</span>
+                    <div class="print-page">
+                        <div class="label-box">
+                            <div class="header-row">
+                                <div class="name-col out-name-container">ชื่อ: <span class="val-name">${patientName}</span></div>
+                                <div class="date-col">วันที่: <span>${patientDate}</span></div>
                             </div>
-                            <div class="qty-col">
-                                <span class="title">จำนวน:</span><span class="value">${qty}</span>
+                            
+                            <div class="drug-row">
+                                <div class="drug-name-col out-drug-container">
+                                    <span class="title">ชื่อยา:</span><span class="value val-drug">${drug}</span>
+                                </div>
+                                <div class="qty-col">
+                                    <span class="title">จำนวน:</span><span class="value">${qty}</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="instruction-box">
-                            <div class="ins-header">วิธีกิน / วิธีใช้</div>
-                            <div class="ins-detail">
-                                <div class="ins-line ins-line1">${line1}</div>
-                                <div class="ins-line ins-line2">${line2}</div>
+                            <div class="instruction-box">
+                                <div class="ins-header">วิธีกิน / วิธีใช้</div>
+                                <div class="ins-detail">
+                                    <div class="ins-line ins-line1">${line1}</div>
+                                    <div class="ins-line ins-line2">${line2}</div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="indication-row out-ind-container">
-                            <span>${indicationStr}</span>
+                            <div class="indication-row out-ind-container">
+                                <span>${indicationStr}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -453,12 +469,11 @@
 
             const generatedLabels = printArea.querySelectorAll('.label-box');
             generatedLabels.forEach(label => {
-                // ปรับขนาด Base Font Size ให้เข้ากับสัดส่วนใหม่ (Portrait)
-                autoShrinkNode(label.querySelector('.out-name-container'), 20);
-                autoShrinkNode(label.querySelector('.out-drug-container'), 24);
-                autoShrinkNode(label.querySelector('.ins-line1'), 28);
-                autoShrinkNode(label.querySelector('.ins-line2'), 28);
-                autoShrinkNode(label.querySelector('.out-ind-container'), 16);
+                autoShrinkNode(label.querySelector('.out-name-container'), 24);
+                autoShrinkNode(label.querySelector('.out-drug-container'), 30);
+                autoShrinkNode(label.querySelector('.ins-line1'), 32);
+                autoShrinkNode(label.querySelector('.ins-line2'), 32);
+                autoShrinkNode(label.querySelector('.out-ind-container'), 20);
             });
 
             window.print();
