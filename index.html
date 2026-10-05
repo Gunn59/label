@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมพิมพ์ฉลากยา TSC TE210</title>
+    <title>โปรแกรมพิมพ์ฉลากยา TSC TE210 / TTP 244 Pro</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -18,13 +18,12 @@
         /* --- ส่วน UI การใช้งาน --- */
         .ui-section {
             width: 100%;
-            max-width: 1100px; /* ขยายความกว้างรวมเพื่อให้รองรับ 2 Card */
+            max-width: 1100px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        /* --- Global Header (ข้อมูลคนไข้) --- */
         .global-header {
             background: #fff;
             padding: 20px;
@@ -34,23 +33,20 @@
         }
         .global-header h3 { text-align: center; margin-bottom: 15px; color: #333; }
 
-        /* --- Grid Container สำหรับเรียง Card --- */
         #cards-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* บังคับให้เป็น 2 คอลัมน์ขนาดเท่ากัน */
-            gap: 15px; /* ระยะห่างระหว่างการ์ด */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             width: 100%;
-            align-items: start; /* ให้การ์ดที่สูงไม่เท่ากัน เริ่มจากด้านบน */
+            align-items: start;
         }
         
-        /* กรณีหน้าจอเล็ก (ต่ำกว่า 768px) ให้กลับมาแสดงแถวละ 1 ใบ */
         @media (max-width: 768px) {
             #cards-container {
                 grid-template-columns: 1fr; 
             }
         }
 
-        /* --- Drug Card (การ์ดยา) --- */
         .drug-card {
             background: #fff;
             padding: 20px;
@@ -59,7 +55,7 @@
             position: relative;
             border: 1px solid #e0e0e0;
             transition: border-color 0.2s;
-            width: 100%; /* ให้การ์ดกว้างเต็มช่อง Grid */
+            width: 100%;
         }
         .drug-card:hover { border-color: #bbb; }
         
@@ -89,7 +85,6 @@
         }
         .btn-delete:hover { background-color: #c82333; }
 
-        /* --- Input Forms --- */
         .input-group { margin-bottom: 12px; display: flex; flex-direction: column; }
         .input-group label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #444; }
         .input-group input, .input-group select {
@@ -98,9 +93,8 @@
             width: 100%;
         }
         .row { display: flex; gap: 10px; }
-        .row .input-group { flex: 1; min-width: 0; /* ช่วยให้ input ไม่ดันกรอบใน layout แบบ flex */ } 
+        .row .input-group { flex: 1; min-width: 0; } 
 
-        /* --- Action Buttons --- */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -119,44 +113,51 @@
         }
         .btn-print:hover { background-color: #218838; }
 
-        /* --- ส่วนฉลากยาสำหรับพริ้นต์ (ซ่อนไว้ตอนใช้งานปกติ) --- */
+        /* --- ส่วนฉลากยาสำหรับพริ้นต์ --- */
         #print-area { display: none; }
         
         .label-box {
-            width: 8cm;
-            height: 5cm;
+            /* ปรับขนาดให้เป็นแนวนอน 152.4 มม. กว้าง x 101.6 มม. สูง */
+            width: 152.4mm;
+            height: 101.6mm;
             background-color: #fff;
-            padding: 10mm 4mm 4mm 4mm;
+            padding: 12mm 8mm 8mm 8mm; 
             display: flex;
             flex-direction: column;
             border: 1px solid #000;
             overflow: hidden;
             box-sizing: border-box;
             page-break-after: always;
+            color: #000;
         }
-        .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px dashed #000; padding-bottom: 3px; margin-bottom: 4px; width: 100%; }
-        .name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 13px; font-weight: bold; }
-        .date-col { white-space: nowrap; font-size: 12px; margin-left: 5px; }
-        .drug-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; width: 100%; }
-        .drug-name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 15px; }
-        .drug-name-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
-        .drug-name-col span.value { font-size: 1em; font-weight: bold; } 
-        .qty-col { white-space: nowrap; margin-left: 5px; text-align: right; font-size: 13px; }
-        .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 2px;}
-        .qty-col span.value { font-size: 1em; font-weight: bold; }
+        .header-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px dashed #000; padding-bottom: 5px; margin-bottom: 10px; width: 100%; }
+        /* ปรับฟอนต์ให้ใหญ่ขึ้นตามกระดาษ */
+        .name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 18px; font-weight: bold; }
+        .date-col { white-space: nowrap; font-size: 16px; margin-left: 10px; }
+        
+        .drug-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; width: 100%; }
+        .drug-name-col { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; font-size: 22px; }
+        .drug-name-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 4px;}
+        .drug-name-col span.value { font-size: 1.1em; font-weight: bold; } 
+        .qty-col { white-space: nowrap; margin-left: 10px; text-align: right; font-size: 18px; }
+        .qty-col span.title { font-size: 0.85em; font-weight: normal; margin-right: 4px;}
+        .qty-col span.value { font-size: 1.1em; font-weight: bold; }
+        
         .instruction-box { text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; overflow: hidden; }
-        .ins-header { font-size: 11px; font-weight: bold; text-decoration: underline; margin-bottom: 2px;}
+        .ins-header { font-size: 16px; font-weight: bold; text-decoration: underline; margin-bottom: 4px;}
         .ins-detail { width: 100%; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
-        .ins-line { font-size: 14px; font-weight: bold; line-height: 1.2; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
-        .indication-row { border-top: 1px solid #ddd; padding-top: 3px; text-align: center; margin-top: auto; width: 100%; font-size: 11px; white-space: nowrap; overflow: hidden; }
+        .ins-line { font-size: 24px; font-weight: bold; line-height: 1.3; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
+        
+        .indication-row { border-top: 1px solid #ddd; padding-top: 6px; text-align: center; margin-top: auto; width: 100%; font-size: 16px; white-space: nowrap; overflow: hidden; }
 
         /* --- ตั้งค่าการพริ้นต์ --- */
         @media print {
-            body { background: transparent; padding: 0; align-items: flex-start; }
+            body { background: transparent; padding: 0; align-items: flex-start; margin: 0; }
             .ui-section { display: none !important; }
-            #print-area { display: block !important; width: 8cm; }
+            #print-area { display: block !important; width: 152.4mm; }
             .label-box { border: none; margin: 0; }
-            @page { size: 8cm 5cm; margin: 0; }
+            /* บังคับขนาดหน้ากระดาษ กว้าง 152.4mm, สูง 101.6mm */
+            @page { size: 152.4mm 101.6mm; margin: 0; }
         }
     </style>
 </head>
@@ -175,7 +176,6 @@
     </datalist>
 
     <div class="ui-section">
-        
         <div class="global-header">
             <h3>ฟอร์มจัดทำฉลากยา</h3>
             <div class="row">
@@ -190,14 +190,12 @@
             </div>
         </div>
 
-        <div id="cards-container">
-            </div>
+        <div id="cards-container"></div>
 
         <div class="action-buttons">
             <button class="btn-add" onclick="addNewCard()">+ เพิ่มรายการยา</button>
             <button class="btn-print" onclick="printSelected()">🖨️ สั่งพริ้นต์เฉพาะที่เลือก</button>
         </div>
-
     </div>
 
     <div id="print-area"></div>
@@ -455,16 +453,16 @@
 
             const generatedLabels = printArea.querySelectorAll('.label-box');
             generatedLabels.forEach(label => {
-                autoShrinkNode(label.querySelector('.out-name-container'), 13);
-                autoShrinkNode(label.querySelector('.out-drug-container'), 15);
-                autoShrinkNode(label.querySelector('.ins-line1'), 14);
-                autoShrinkNode(label.querySelector('.ins-line2'), 14);
-                autoShrinkNode(label.querySelector('.out-ind-container'), 11);
+                // ปรับขนาด Base Font Size ของ Script ให้ใหญ่ตามกระดาษ 152.4 x 101.6 มม.
+                autoShrinkNode(label.querySelector('.out-name-container'), 18);
+                autoShrinkNode(label.querySelector('.out-drug-container'), 22);
+                autoShrinkNode(label.querySelector('.ins-line1'), 24);
+                autoShrinkNode(label.querySelector('.ins-line2'), 24);
+                autoShrinkNode(label.querySelector('.out-ind-container'), 16);
             });
 
             window.print();
         }
     </script>
-
 </body>
 </html>
